@@ -16,18 +16,18 @@ from plotly.subplots import make_subplots
 # =============================================================================
 st.set_page_config(
     page_title="Funnel ROI Analysis",
-    page_icon="📈",
+    page_icon="🏢",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
+# Custom CSS for better styling - Funnel brand colors
 st.markdown("""
 <style>
     .main-header {
         font-size: 2.5rem;
         font-weight: 700;
-        color: #1E3A5F;
+        color: #2D2D2D;
         margin-bottom: 0;
     }
     .sub-header {
@@ -36,7 +36,7 @@ st.markdown("""
         margin-top: 0;
     }
     .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #E91E8C 0%, #FF9B7F 100%);
         padding: 20px;
         border-radius: 10px;
         color: white;
@@ -51,7 +51,7 @@ st.markdown("""
         opacity: 0.9;
     }
     .positive {
-        color: #00C853;
+        color: #E91E8C;
     }
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
@@ -62,19 +62,19 @@ st.markdown("""
         border-radius: 5px;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #667eea;
+        background: linear-gradient(135deg, #E91E8C 0%, #FF9B7F 100%);
         color: white;
     }
     .highlight-box {
-        background-color: #e8f4ea;
-        border-left: 4px solid #00C853;
+        background-color: #FFE8F5;
+        border-left: 4px solid #E91E8C;
         padding: 15px;
         border-radius: 5px;
         margin: 10px 0;
     }
     .warning-box {
-        background-color: #fff3e0;
-        border-left: 4px solid #ff9800;
+        background-color: #FFF5F0;
+        border-left: 4px solid #FF9B7F;
         padding: 15px;
         border-radius: 5px;
         margin: 10px 0;
@@ -287,7 +287,7 @@ with tab1:
             labels=['Conversion', 'Retention', 'Labor', 'Marketing'],
             values=[conversion_benefit, retention_benefit, labor_benefit, marketing_benefit],
             hole=.6,
-            marker_colors=['#667eea', '#764ba2', '#f093fb', '#f5576c']
+            marker_colors=['#E91E8C', '#FF1493', '#FF6BA9', '#FF9B7F']
         )])
         fig.update_layout(
             title="Annual Benefit Distribution",
@@ -335,7 +335,7 @@ with tab2:
             go.Bar(
                 x=['Conversion', 'Retention', 'Labor', 'Marketing'],
                 y=[conversion_benefit, retention_benefit, labor_benefit, marketing_benefit],
-                marker_color=['#667eea', '#764ba2', '#f093fb', '#f5576c'],
+                marker_color=['#E91E8C', '#FF1493', '#FF6BA9', '#FF9B7F'],
                 text=[f'${v/1e6:.2f}M' for v in [conversion_benefit, retention_benefit, labor_benefit, marketing_benefit]],
                 textposition='outside'
             )
@@ -462,9 +462,9 @@ with tab3:
     cumulative_net = [b - c for b, c in zip(cumulative_benefit, cumulative_cost)]
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=years, y=cumulative_benefit, name='Cumulative Benefit', line=dict(color='#00C853', width=3)))
-    fig.add_trace(go.Scatter(x=years, y=cumulative_cost, name='Cumulative Cost', line=dict(color='#f5576c', width=3)))
-    fig.add_trace(go.Scatter(x=years, y=cumulative_net, name='Cumulative Net', line=dict(color='#667eea', width=3), fill='tozeroy'))
+    fig.add_trace(go.Scatter(x=years, y=cumulative_benefit, name='Cumulative Benefit', line=dict(color='#E91E8C', width=3)))
+    fig.add_trace(go.Scatter(x=years, y=cumulative_cost, name='Cumulative Cost', line=dict(color='#FF9B7F', width=3)))
+    fig.add_trace(go.Scatter(x=years, y=cumulative_net, name='Cumulative Net', line=dict(color='#FF1493', width=3), fill='tozeroy'))
 
     fig.update_layout(
         title="5-Year Financial Projection",
@@ -521,8 +521,8 @@ with tab4:
     with col1:
         # Scenario comparison bar chart
         fig = go.Figure(data=[
-            go.Bar(name='Total Benefit', x=scenarios_df['Scenario'], y=scenarios_df['Total Benefit'], marker_color='#667eea'),
-            go.Bar(name='Net Benefit', x=scenarios_df['Scenario'], y=scenarios_df['Net Benefit'], marker_color='#00C853')
+            go.Bar(name='Total Benefit', x=scenarios_df['Scenario'], y=scenarios_df['Total Benefit'], marker_color='#E91E8C'),
+            go.Bar(name='Net Benefit', x=scenarios_df['Scenario'], y=scenarios_df['Net Benefit'], marker_color='#FF6BA9')
         ])
         fig.update_layout(
             title="Benefit by Scenario",
@@ -607,7 +607,7 @@ with tab4:
         x=results_df['Variable'],
         y=results_df['Net Benefit'],
         mode='lines+markers',
-        line=dict(color='#667eea', width=3),
+        line=dict(color='#E91E8C', width=3),
         marker=dict(size=8)
     ))
     fig.update_layout(
@@ -618,7 +618,7 @@ with tab4:
     )
     # Add reference line at base case value
     base_net_benefit = base_conversion_benefit + base_retention_benefit + base_labor_benefit + base_marketing_benefit - annual_cost
-    fig.add_hline(y=base_net_benefit, line_dash="dash", line_color="green",
+    fig.add_hline(y=base_net_benefit, line_dash="dash", line_color="#FF6BA9",
                   annotation_text=f"Base Case: ${base_net_benefit:,.0f}")
     st.plotly_chart(fig, use_container_width=True)
 
