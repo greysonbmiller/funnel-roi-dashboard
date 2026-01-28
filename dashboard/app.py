@@ -110,10 +110,6 @@ st.markdown("""
     [data-testid="stSidebar"] {
         background-color: #FAFAFA;
     }
-    .reset-btn {
-        font-size: 0.7rem;
-        padding: 0.1rem 0.3rem;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -204,384 +200,100 @@ if df is None:
 data_summary = data_result
 
 # =============================================================================
-# DEFAULT VALUES (for reset functionality)
-# =============================================================================
-DEFAULTS = {
-    # Portfolio
-    'total_units': int(data_summary['total_units']),
-    'avg_rent': int(round(data_summary['avg_rent'])),
-    'occupancy_rate': 94,
-    'turnover_rate': 50,
-    # Costs
-    'cost_per_turnover': 4000,
-    'vacancy_days': 30,
-    'vacancy_days_saved': 10,
-    'hourly_wage': 22,
-    # Staffing
-    'units_per_staff': int(data_summary['total_units'] / data_summary['total_onsite_staff']),
-    # Funnel Performance
-    'funnel_price': 3.70,
-    'conversion_lift': round(data_summary['avg_conversion_lift'] * 100, 1),
-    'churn_reduction': round(data_summary['avg_churn_reduction'] * 100, 2),
-    'efficiency_improvement': int(data_summary['avg_efficiency_improvement'] * 100),
-    # Scenario
-    'scenario_index': 0,
-}
-
-# Initialize session state with defaults
-for key, default_value in DEFAULTS.items():
-    if key not in st.session_state:
-        st.session_state[key] = default_value
-
-# =============================================================================
-# HELPER FUNCTION FOR RESET BUTTONS
-# =============================================================================
-def reset_field(field_name):
-    """Reset a single field to its default value."""
-    st.session_state[field_name] = DEFAULTS[field_name]
-
-def reset_section(section_fields):
-    """Reset all fields in a section to their defaults."""
-    for field in section_fields:
-        st.session_state[field] = DEFAULTS[field]
-
-# =============================================================================
-# SIDEBAR - ASSUMPTION INPUTS (with data-driven defaults and reset buttons)
+# SIDEBAR - ASSUMPTION INPUTS (with data-driven defaults)
 # =============================================================================
 st.sidebar.markdown("## Model Assumptions")
 st.sidebar.markdown("*Defaults loaded from actual data*")
 st.sidebar.markdown("---")
 
-# -----------------------------------------------------------------------------
-# PORTFOLIO SECTION
-# -----------------------------------------------------------------------------
-portfolio_fields = ['total_units', 'avg_rent', 'occupancy_rate', 'turnover_rate']
-col_header, col_reset = st.sidebar.columns([3, 1])
-with col_header:
-    st.markdown("### Portfolio")
-with col_reset:
-    if st.button("Reset", key="reset_portfolio", help="Reset all Portfolio fields"):
-        reset_section(portfolio_fields)
-        st.rerun()
-
-# Total Units
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    total_units = st.number_input(
-        "Total Units",
-        value=st.session_state['total_units'],
-        min_value=1000,
-        max_value=100000,
-        step=1000,
-        key="input_total_units"
-    )
-    st.session_state['total_units'] = total_units
-with col2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_total_units", help=f"Reset to {DEFAULTS['total_units']:,}"):
-        reset_field('total_units')
-        st.rerun()
-
-# Average Rent
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    avg_rent = st.number_input(
-        "Average Monthly Rent ($)",
-        value=st.session_state['avg_rent'],
-        min_value=500,
-        max_value=5000,
-        step=50,
-        key="input_avg_rent"
-    )
-    st.session_state['avg_rent'] = avg_rent
-with col2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_avg_rent", help=f"Reset to ${DEFAULTS['avg_rent']:,}"):
-        reset_field('avg_rent')
-        st.rerun()
-
-# Occupancy Rate
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    occupancy_rate_pct = st.slider(
-        "Occupancy Rate (%)",
-        min_value=70,
-        max_value=99,
-        value=st.session_state['occupancy_rate'],
-        key="input_occupancy_rate"
-    )
-    st.session_state['occupancy_rate'] = occupancy_rate_pct
-    occupancy_rate = occupancy_rate_pct / 100
-with col2:
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_occupancy_rate", help=f"Reset to {DEFAULTS['occupancy_rate']}%"):
-        reset_field('occupancy_rate')
-        st.rerun()
-
-# Turnover Rate
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    turnover_rate_pct = st.slider(
-        "Annual Turnover Rate (%)",
-        min_value=30,
-        max_value=70,
-        value=st.session_state['turnover_rate'],
-        key="input_turnover_rate"
-    )
-    st.session_state['turnover_rate'] = turnover_rate_pct
-    turnover_rate = turnover_rate_pct / 100
-with col2:
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_turnover_rate", help=f"Reset to {DEFAULTS['turnover_rate']}%"):
-        reset_field('turnover_rate')
-        st.rerun()
+# Portfolio Assumptions (from data)
+st.sidebar.markdown("### Portfolio")
+total_units = st.sidebar.number_input(
+    "Total Units",
+    value=int(data_summary['total_units']),
+    min_value=1000,
+    max_value=100000,
+    step=1000
+)
+avg_rent = st.sidebar.number_input(
+    "Average Monthly Rent ($)",
+    value=int(round(data_summary['avg_rent'])),
+    min_value=500,
+    max_value=5000,
+    step=50
+)
+occupancy_rate = st.sidebar.slider("Occupancy Rate (%)", min_value=70, max_value=99, value=94) / 100
+turnover_rate = st.sidebar.slider("Annual Turnover Rate (%)", min_value=30, max_value=70, value=50) / 100
 
 st.sidebar.markdown("---")
 
-# -----------------------------------------------------------------------------
-# COSTS SECTION
-# -----------------------------------------------------------------------------
-cost_fields = ['cost_per_turnover', 'vacancy_days', 'vacancy_days_saved', 'hourly_wage']
-col_header, col_reset = st.sidebar.columns([3, 1])
-with col_header:
-    st.markdown("### Costs")
-with col_reset:
-    if st.button("Reset", key="reset_costs", help="Reset all Cost fields"):
-        reset_section(cost_fields)
-        st.rerun()
-
-# Cost per Turnover
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    cost_per_turnover = st.number_input(
-        "Cost per Turnover ($)",
-        value=st.session_state['cost_per_turnover'],
-        min_value=1000,
-        max_value=10000,
-        step=250,
-        key="input_cost_per_turnover"
-    )
-    st.session_state['cost_per_turnover'] = cost_per_turnover
-with col2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_cost_per_turnover", help=f"Reset to ${DEFAULTS['cost_per_turnover']:,}"):
-        reset_field('cost_per_turnover')
-        st.rerun()
-
-# Vacancy Days
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    vacancy_days = st.number_input(
-        "Vacancy Days per Turnover",
-        value=st.session_state['vacancy_days'],
-        min_value=14,
-        max_value=60,
-        step=1,
-        key="input_vacancy_days"
-    )
-    st.session_state['vacancy_days'] = vacancy_days
-with col2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_vacancy_days", help=f"Reset to {DEFAULTS['vacancy_days']} days"):
-        reset_field('vacancy_days')
-        st.rerun()
-
-# Vacancy Days Saved
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    vacancy_days_saved = st.number_input(
-        "Vacancy Days Saved per Lease",
-        value=st.session_state['vacancy_days_saved'],
-        min_value=5,
-        max_value=30,
-        step=1,
-        help="Conservative estimate: faster leasing reduces vacancy time by this many days per lease",
-        key="input_vacancy_days_saved"
-    )
-    st.session_state['vacancy_days_saved'] = vacancy_days_saved
-with col2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_vacancy_days_saved", help=f"Reset to {DEFAULTS['vacancy_days_saved']} days"):
-        reset_field('vacancy_days_saved')
-        st.rerun()
-
-# Hourly Wage
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    hourly_wage = st.number_input(
-        "Leasing Staff Hourly Wage ($)",
-        value=st.session_state['hourly_wage'],
-        min_value=15,
-        max_value=40,
-        step=1,
-        key="input_hourly_wage"
-    )
-    st.session_state['hourly_wage'] = hourly_wage
-with col2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_hourly_wage", help=f"Reset to ${DEFAULTS['hourly_wage']}"):
-        reset_field('hourly_wage')
-        st.rerun()
+# Cost Assumptions
+st.sidebar.markdown("### Costs")
+cost_per_turnover = st.sidebar.number_input("Cost per Turnover ($)", value=4000, min_value=1000, max_value=10000, step=250)
+vacancy_days = st.sidebar.number_input("Vacancy Days per Turnover", value=30, min_value=14, max_value=60, step=1)
+vacancy_days_saved = st.sidebar.number_input(
+    "Vacancy Days Saved per Additional Lease",
+    value=10,
+    min_value=5,
+    max_value=30,
+    step=1,
+    help="Conservative estimate: faster leasing reduces vacancy time by this many days per lease"
+)
+hourly_wage = st.sidebar.number_input("Leasing Staff Hourly Wage ($)", value=22, min_value=15, max_value=40, step=1)
 
 st.sidebar.markdown("---")
 
-# -----------------------------------------------------------------------------
-# STAFFING SECTION
-# -----------------------------------------------------------------------------
-staffing_fields = ['units_per_staff']
-col_header, col_reset = st.sidebar.columns([3, 1])
-with col_header:
-    st.markdown("### Staffing")
-with col_reset:
-    if st.button("Reset", key="reset_staffing", help="Reset Staffing fields"):
-        reset_section(staffing_fields)
-        st.rerun()
-
-actual_units_per_staff = DEFAULTS['units_per_staff']
-
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    units_per_staff = st.slider(
-        "Units per Leasing Staff Member",
-        min_value=10,
-        max_value=50,
-        value=st.session_state['units_per_staff'],
-        step=1,
-        help=f"From data: {actual_units_per_staff}:1 ratio ({int(data_summary['total_onsite_staff']):,} staff for {int(data_summary['total_units']):,} units)",
-        key="input_units_per_staff"
-    )
-    st.session_state['units_per_staff'] = units_per_staff
-with col2:
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_units_per_staff", help=f"Reset to {DEFAULTS['units_per_staff']}:1"):
-        reset_field('units_per_staff')
-        st.rerun()
-
-st.sidebar.markdown(f"- Data shows: {actual_units_per_staff}:1 ratio")
+# Staffing Assumptions (from actual data)
+st.sidebar.markdown("### Staffing")
+actual_units_per_staff = data_summary['total_units'] / data_summary['total_onsite_staff']
+units_per_staff = st.sidebar.slider(
+    "Units per Leasing Staff Member",
+    min_value=10,
+    max_value=50,
+    value=round(actual_units_per_staff),
+    step=1,
+    help=f"From data: {actual_units_per_staff:.1f}:1 ratio ({int(data_summary['total_onsite_staff']):,} staff for {int(data_summary['total_units']):,} units)"
+)
+st.sidebar.markdown(f"- Data shows: **{actual_units_per_staff:.1f}:1** ratio")
 st.sidebar.markdown(f"- Total staff from data: {int(data_summary['total_onsite_staff']):,}")
 
 st.sidebar.markdown("---")
 
-# -----------------------------------------------------------------------------
-# FUNNEL PERFORMANCE SECTION
-# -----------------------------------------------------------------------------
-funnel_fields = ['funnel_price', 'conversion_lift', 'churn_reduction', 'efficiency_improvement']
-col_header, col_reset = st.sidebar.columns([3, 1])
-with col_header:
-    st.markdown("### Funnel Performance")
-with col_reset:
-    if st.button("Reset", key="reset_funnel", help="Reset all Funnel Performance fields"):
-        reset_section(funnel_fields)
-        st.rerun()
-
+# Funnel Assumptions (from data)
+st.sidebar.markdown("### Funnel Performance")
 st.sidebar.markdown("*From dataset assumptions*")
-
-# Funnel Price
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    funnel_price = st.number_input(
-        "Funnel Price ($/unit/month)",
-        value=st.session_state['funnel_price'],
-        min_value=1.00,
-        max_value=12.00,
-        step=0.10,
-        format="%.2f",
-        key="input_funnel_price"
-    )
-    st.session_state['funnel_price'] = funnel_price
-with col2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_funnel_price", help=f"Reset to ${DEFAULTS['funnel_price']:.2f}"):
-        reset_field('funnel_price')
-        st.rerun()
-
-# Conversion Lift
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    conversion_lift_pct = st.slider(
-        "Conversion Improvement (%)",
-        min_value=1.0,
-        max_value=15.0,
-        value=float(st.session_state['conversion_lift']),
-        step=0.5,
-        key="input_conversion_lift"
-    )
-    st.session_state['conversion_lift'] = conversion_lift_pct
-    conversion_lift = conversion_lift_pct / 100
-with col2:
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_conversion_lift", help=f"Reset to {DEFAULTS['conversion_lift']}%"):
-        reset_field('conversion_lift')
-        st.rerun()
-
-# Churn Reduction
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    churn_reduction_pct = st.slider(
-        "Churn Reduction (%)",
-        min_value=1.0,
-        max_value=10.0,
-        value=float(st.session_state['churn_reduction']),
-        step=0.25,
-        key="input_churn_reduction"
-    )
-    st.session_state['churn_reduction'] = churn_reduction_pct
-    churn_reduction = churn_reduction_pct / 100
-with col2:
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_churn_reduction", help=f"Reset to {DEFAULTS['churn_reduction']}%"):
-        reset_field('churn_reduction')
-        st.rerun()
-
-# Efficiency Improvement
-col1, col2 = st.sidebar.columns([4, 1])
-with col1:
-    efficiency_improvement_pct = st.slider(
-        "Agent Efficiency Improvement (%)",
-        min_value=10,
-        max_value=35,
-        value=st.session_state['efficiency_improvement'],
-        key="input_efficiency_improvement"
-    )
-    st.session_state['efficiency_improvement'] = efficiency_improvement_pct
-    efficiency_improvement = efficiency_improvement_pct / 100
-with col2:
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    if st.button("↺", key="reset_efficiency_improvement", help=f"Reset to {DEFAULTS['efficiency_improvement']}%"):
-        reset_field('efficiency_improvement')
-        st.rerun()
+funnel_price = st.sidebar.number_input("Funnel Price ($/unit/month)", value=3.70, min_value=1.00, max_value=12.00, step=0.10, format="%.2f")
+conversion_lift = st.sidebar.slider(
+    "Conversion Improvement (%)",
+    min_value=1.0,
+    max_value=15.0,
+    value=round(data_summary['avg_conversion_lift'] * 100, 1),
+    step=0.5
+) / 100
+churn_reduction = st.sidebar.slider(
+    "Churn Reduction (%)",
+    min_value=1.0,
+    max_value=10.0,
+    value=round(data_summary['avg_churn_reduction'] * 100, 2),
+    step=0.25
+) / 100
+efficiency_improvement = st.sidebar.slider(
+    "Agent Efficiency Improvement (%)",
+    min_value=10,
+    max_value=35,
+    value=int(data_summary['avg_efficiency_improvement'] * 100)
+) / 100
 
 st.sidebar.markdown("---")
 
-# -----------------------------------------------------------------------------
-# SCENARIO SECTION
-# -----------------------------------------------------------------------------
-col_header, col_reset = st.sidebar.columns([3, 1])
-with col_header:
-    st.markdown("### Scenario")
-with col_reset:
-    if st.button("Reset", key="reset_scenario", help="Reset to Conservative"):
-        reset_field('scenario_index')
-        st.rerun()
-
+# Scenario Selection - Conservative as default
+st.sidebar.markdown("### Scenario")
 scenario = st.sidebar.radio(
     "Select Scenario",
     ["Conservative (50%)", "Base Case (100%)", "Optimistic (150%)"],
-    index=st.session_state['scenario_index'],
-    key="input_scenario"
+    index=0  # Conservative as default
 )
-# Update session state based on selection
-scenario_options = ["Conservative (50%)", "Base Case (100%)", "Optimistic (150%)"]
-st.session_state['scenario_index'] = scenario_options.index(scenario)
 scenario_multiplier = {"Conservative (50%)": 0.5, "Base Case (100%)": 1.0, "Optimistic (150%)": 1.5}[scenario]
-
-st.sidebar.markdown("---")
-
-# Reset All Button
-if st.sidebar.button("Reset All to Defaults", type="primary", use_container_width=True):
-    for key in DEFAULTS:
-        st.session_state[key] = DEFAULTS[key]
-    st.rerun()
 
 # Staffing calculations using actual data
 total_staff = int(data_summary['total_onsite_staff'])
