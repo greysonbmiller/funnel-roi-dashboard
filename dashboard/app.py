@@ -172,17 +172,45 @@ def load_data():
         # Calculate portfolio-level metrics from actual data
         data_summary = {
             'total_properties': len(df),
+            # Units statistics
             'total_units': df['units'].sum(),
+            'units_mean': df['units'].mean(),
+            'units_median': df['units'].median(),
+            'units_std': df['units'].std(),
+            'units_min': df['units'].min(),
+            'units_max': df['units'].max(),
+            # Rent statistics
             'avg_rent': df['avg_rent'].mean(),
             'avg_rent_median': df['avg_rent'].median(),
+            'avg_rent_std': df['avg_rent'].std(),
+            'avg_rent_min': df['avg_rent'].min(),
+            'avg_rent_max': df['avg_rent'].max(),
+            # Leads and performance
             'total_monthly_leads': df['monthly_leads'].sum(),
             'avg_contact_rate': df['contact_rate'].mean(),
             'total_monthly_tours': df['tours_booked'].sum(),
+            # Staffing statistics
             'total_onsite_staff': df['onsite_staff_count'].sum(),
+            'staff_mean': df['onsite_staff_count'].mean(),
+            'staff_median': df['onsite_staff_count'].median(),
+            'staff_std': df['onsite_staff_count'].std(),
             'total_monthly_leasing_hours': df['leasing_staff_hours'].sum(),
+            # Conversion lift statistics
             'avg_conversion_lift': df['funnel_lead_to_lease_improvement_pct'].mean(),
+            'conversion_lift_median': df['funnel_lead_to_lease_improvement_pct'].median(),
+            'conversion_lift_std': df['funnel_lead_to_lease_improvement_pct'].std(),
+            'conversion_lift_min': df['funnel_lead_to_lease_improvement_pct'].min(),
+            'conversion_lift_max': df['funnel_lead_to_lease_improvement_pct'].max(),
+            # Churn reduction statistics
             'avg_churn_reduction': df['funnel_churn_reduction_pct'].mean(),
+            'churn_reduction_median': df['funnel_churn_reduction_pct'].median(),
+            'churn_reduction_std': df['funnel_churn_reduction_pct'].std(),
+            'churn_reduction_min': df['funnel_churn_reduction_pct'].min(),
+            'churn_reduction_max': df['funnel_churn_reduction_pct'].max(),
+            # Efficiency improvement statistics
             'avg_efficiency_improvement': df['funnel_agent_to_unit_ratio_improvement_pct'].mean(),
+            'efficiency_std': df['funnel_agent_to_unit_ratio_improvement_pct'].std(),
+            # Missing data info
             'missing_info': missing_info
         }
 
@@ -213,33 +241,106 @@ total_units = st.sidebar.number_input(
     value=int(data_summary['total_units']),
     min_value=1000,
     max_value=100000,
-    step=1000
+    step=1000,
+    help=f"**From Data:** Sum of {data_summary['total_properties']:,} properties\n\n"
+         f"- Mean per property: {data_summary['units_mean']:.1f} units\n"
+         f"- Median: {data_summary['units_median']:.0f} units\n"
+         f"- Std Dev: {data_summary['units_std']:.1f}\n"
+         f"- Range: {data_summary['units_min']:,} - {data_summary['units_max']:,} units"
 )
 avg_rent = st.sidebar.number_input(
     "Average Monthly Rent ($)",
     value=int(round(data_summary['avg_rent'])),
     min_value=500,
     max_value=5000,
-    step=50
+    step=50,
+    help=f"**From Data:** Portfolio average rent\n\n"
+         f"- Mean: ${data_summary['avg_rent']:,.0f}\n"
+         f"- Median: ${data_summary['avg_rent_median']:,.0f}\n"
+         f"- Std Dev: ${data_summary['avg_rent_std']:,.0f}\n"
+         f"- Range: ${data_summary['avg_rent_min']:,.0f} - ${data_summary['avg_rent_max']:,.0f}\n"
+         f"- Missing values: {data_summary['missing_info']['avg_rent']} (filled with median)"
 )
-occupancy_rate = st.sidebar.slider("Occupancy Rate (%)", min_value=70, max_value=99, value=94) / 100
-turnover_rate = st.sidebar.slider("Annual Turnover Rate (%)", min_value=30, max_value=70, value=50) / 100
+occupancy_rate = st.sidebar.slider(
+    "Occupancy Rate (%)",
+    min_value=70,
+    max_value=99,
+    value=94,
+    help="**Industry Assumption:** Not in dataset\n\n"
+         "- 94% is typical for stabilized multifamily\n"
+         "- Class A: 93-96%\n"
+         "- Class B: 91-95%\n"
+         "- Class C: 88-93%"
+) / 100
+turnover_rate = st.sidebar.slider(
+    "Annual Turnover Rate (%)",
+    min_value=30,
+    max_value=70,
+    value=50,
+    help="**Industry Assumption:** Not in dataset\n\n"
+         "- 50% is national average\n"
+         "- Class A (Luxury): 40-50%\n"
+         "- Class B: 50-55%\n"
+         "- Class C: 55-65%\n"
+         "- Student Housing: 90-100%"
+) / 100
 
 st.sidebar.markdown("---")
 
 # Cost Assumptions
 st.sidebar.markdown("### Costs")
-cost_per_turnover = st.sidebar.number_input("Cost per Turnover ($)", value=4000, min_value=1000, max_value=10000, step=250)
-vacancy_days = st.sidebar.number_input("Vacancy Days per Turnover", value=30, min_value=14, max_value=60, step=1)
+cost_per_turnover = st.sidebar.number_input(
+    "Cost per Turnover ($)",
+    value=4000,
+    min_value=1000,
+    max_value=10000,
+    step=250,
+    help="**Industry Assumption:** Not in dataset\n\n"
+         "Includes: cleaning, repairs, marketing, admin time\n\n"
+         "- Budget properties: $2,500-$3,500\n"
+         "- Mid-range: $3,500-$4,500\n"
+         "- Class A/Luxury: $4,500-$6,000+\n"
+         "- NAA benchmark: ~$4,000"
+)
+vacancy_days = st.sidebar.number_input(
+    "Vacancy Days per Turnover",
+    value=30,
+    min_value=14,
+    max_value=60,
+    step=1,
+    help="**Industry Assumption:** Not in dataset\n\n"
+         "Days unit sits empty during turnover\n\n"
+         "- High demand markets: 14-21 days\n"
+         "- Average markets: 25-35 days\n"
+         "- Slower markets: 35-60 days\n"
+         "- Industry average: ~30 days"
+)
 vacancy_days_saved = st.sidebar.number_input(
     "Vacancy Days Saved per Additional Lease",
     value=10,
     min_value=5,
     max_value=30,
     step=1,
-    help="Conservative estimate: faster leasing reduces vacancy time by this many days per lease"
+    help="**Conservative Estimate**\n\n"
+         "How many days faster units lease with Funnel\n\n"
+         "- Conservative: 5-10 days\n"
+         "- Moderate: 10-15 days\n"
+         "- Aggressive: 15-30 days\n\n"
+         "This is the key driver of conversion benefit"
 )
-hourly_wage = st.sidebar.number_input("Leasing Staff Hourly Wage ($)", value=22, min_value=15, max_value=40, step=1)
+hourly_wage = st.sidebar.number_input(
+    "Leasing Staff Hourly Wage ($)",
+    value=22,
+    min_value=15,
+    max_value=40,
+    step=1,
+    help="**Industry Assumption:** Not in dataset\n\n"
+         "Fully-loaded hourly cost for leasing staff\n\n"
+         "- Entry level: $15-$18/hr\n"
+         "- Experienced: $18-$25/hr\n"
+         "- Senior/Urban: $25-$35/hr\n"
+         "- With benefits (~30%): add $5-$8/hr"
+)
 
 st.sidebar.markdown("---")
 
@@ -252,7 +353,15 @@ units_per_staff = st.sidebar.slider(
     max_value=50,
     value=round(actual_units_per_staff),
     step=1,
-    help=f"From data: {actual_units_per_staff:.1f}:1 ratio ({int(data_summary['total_onsite_staff']):,} staff for {int(data_summary['total_units']):,} units)"
+    help=f"**From Data:** Calculated from staffing sheet\n\n"
+         f"- Portfolio ratio: **{actual_units_per_staff:.1f}:1**\n"
+         f"- Total staff: {int(data_summary['total_onsite_staff']):,}\n"
+         f"- Total units: {int(data_summary['total_units']):,}\n\n"
+         f"**Per Property Stats:**\n"
+         f"- Mean staff: {data_summary['staff_mean']:.1f}\n"
+         f"- Median staff: {data_summary['staff_median']:.0f}\n"
+         f"- Std Dev: {data_summary['staff_std']:.1f}\n\n"
+         f"Industry typical: 50-100 units per agent"
 )
 st.sidebar.markdown(f"- Data shows: **{actual_units_per_staff:.1f}:1** ratio")
 st.sidebar.markdown(f"- Total staff from data: {int(data_summary['total_onsite_staff']):,}")
@@ -262,26 +371,56 @@ st.sidebar.markdown("---")
 # Funnel Assumptions (from data)
 st.sidebar.markdown("### Funnel Performance")
 st.sidebar.markdown("*From dataset assumptions*")
-funnel_price = st.sidebar.number_input("Funnel Price ($/unit/month)", value=3.70, min_value=1.00, max_value=12.00, step=0.10, format="%.2f")
+funnel_price = st.sidebar.number_input(
+    "Funnel Price ($/unit/month)",
+    value=3.70,
+    min_value=1.00,
+    max_value=12.00,
+    step=0.10,
+    format="%.2f",
+    help="**Pricing Assumption**\n\n"
+         "Funnel Intelligence Bundle pricing\n\n"
+         "- Entry tier: $2-3/unit/mo\n"
+         "- Standard: $3-5/unit/mo\n"
+         "- Premium: $5-8/unit/mo\n"
+         "- Enterprise: Custom pricing"
+)
 conversion_lift = st.sidebar.slider(
     "Conversion Improvement (%)",
     min_value=1.0,
     max_value=15.0,
     value=round(data_summary['avg_conversion_lift'] * 100, 1),
-    step=0.5
+    step=0.5,
+    help=f"**From Data:** Funnel assumptions sheet\n\n"
+         f"- Mean: **{data_summary['avg_conversion_lift']*100:.2f}%**\n"
+         f"- Median: {data_summary['conversion_lift_median']*100:.2f}%\n"
+         f"- Std Dev: {data_summary['conversion_lift_std']*100:.2f}%\n"
+         f"- Range: {data_summary['conversion_lift_min']*100:.1f}% - {data_summary['conversion_lift_max']*100:.1f}%\n\n"
+         f"Improvement in lead-to-lease conversion rate"
 ) / 100
 churn_reduction = st.sidebar.slider(
     "Churn Reduction (%)",
     min_value=1.0,
     max_value=10.0,
     value=round(data_summary['avg_churn_reduction'] * 100, 2),
-    step=0.25
+    step=0.25,
+    help=f"**From Data:** Funnel assumptions sheet\n\n"
+         f"- Mean: **{data_summary['avg_churn_reduction']*100:.2f}%**\n"
+         f"- Median: {data_summary['churn_reduction_median']*100:.2f}%\n"
+         f"- Std Dev: {data_summary['churn_reduction_std']*100:.2f}%\n"
+         f"- Range: {data_summary['churn_reduction_min']*100:.1f}% - {data_summary['churn_reduction_max']*100:.1f}%\n\n"
+         f"Reduction in resident turnover/churn"
 ) / 100
 efficiency_improvement = st.sidebar.slider(
     "Agent Efficiency Improvement (%)",
     min_value=10,
     max_value=35,
-    value=int(data_summary['avg_efficiency_improvement'] * 100)
+    value=int(data_summary['avg_efficiency_improvement'] * 100),
+    help=f"**From Data:** Funnel assumptions sheet\n\n"
+         f"- Value: **{data_summary['avg_efficiency_improvement']*100:.0f}%** (constant)\n"
+         f"- Std Dev: {data_summary['efficiency_std']*100:.2f}%\n\n"
+         f"Improvement in agent productivity\n"
+         f"(same staff handles more units)"
 ) / 100
 
 st.sidebar.markdown("---")
@@ -291,7 +430,12 @@ st.sidebar.markdown("### Scenario")
 scenario = st.sidebar.radio(
     "Select Scenario",
     ["Conservative (50%)", "Base Case (100%)", "Optimistic (150%)"],
-    index=0  # Conservative as default
+    index=0,  # Conservative as default
+    help="**Scenario Multiplier**\n\n"
+         "Scales all benefit calculations:\n\n"
+         "- **Conservative (50%)**: Half of projected benefits - recommended for CFO presentations\n"
+         "- **Base Case (100%)**: Full projected benefits from data\n"
+         "- **Optimistic (150%)**: 1.5x projected benefits"
 )
 scenario_multiplier = {"Conservative (50%)": 0.5, "Base Case (100%)": 1.0, "Optimistic (150%)": 1.5}[scenario]
 
