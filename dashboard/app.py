@@ -380,10 +380,7 @@ funnel_price = st.sidebar.number_input(
     format="%.2f",
     help="**Pricing Assumption**\n\n"
          "Funnel Intelligence Bundle pricing\n\n"
-         "- Entry tier: $2-3/unit/mo\n"
-         "- Standard: $3-5/unit/mo\n"
-         "- Premium: $5-8/unit/mo\n"
-         "- Enterprise: Custom pricing"
+         "- Entry tier: $3.7/unit/mo"
 )
 conversion_lift = st.sidebar.slider(
     "Conversion Improvement (%)",
@@ -433,7 +430,7 @@ scenario = st.sidebar.radio(
     index=0,  # Conservative as default
     help="**Scenario Multiplier**\n\n"
          "Scales all benefit calculations:\n\n"
-         "- **Conservative (50%)**: Half of projected benefits - recommended for CFO presentations\n"
+         "- **Conservative (50%)**: Half of projected benefits"
          "- **Base Case (100%)**: Full projected benefits from data\n"
          "- **Optimistic (150%)**: 1.5x projected benefits"
 )
@@ -674,8 +671,8 @@ with tab2:
         **3. Labor Efficiency: ${labor_benefit:,.0f}/year**
         - Current annual leasing hours: {annual_leasing_hours:,.0f}
         - Hours saved ({efficiency_improvement*100:.0f}%): {hours_saved:,.0f}
-        - At ${hourly_wage}/hour = ${labor_benefit:,.0f}
-        - Enables centralization strategy
+        - At {hourly_wage}/hour = ${labor_benefit:,.0f}
+        - Enabled by our centralization strategy
         """)
 
         st.markdown(f"""
@@ -857,7 +854,7 @@ with tab4:
 
         st.markdown("""
         <div class="highlight-box">
-            <strong>Recommendation:</strong> We present the <strong>Conservative scenario</strong> as our primary recommendation.
+            We present the <strong>Conservative scenario</strong> as our primary recommendation.
             Even at 50% of projected benefits, the investment delivers strong positive ROI.
         </div>
         """, unsafe_allow_html=True)
@@ -988,7 +985,7 @@ with tab5:
         | Benefit | ${benefit_per_unit/12:.2f} | ${benefit_per_unit:.2f} |
         | Net | ${net_per_unit/12:.2f} | ${net_per_unit:.2f} |
 
-        ### CFO Talking Points
+        ### Critical Features
         - Investment pays for itself in {payback_months:.1f} months
         - {roi_percentage:,.0f}% ROI using conservative methodology
         - Operating expense (not CapEx) - ${funnel_price:.2f}/unit/month
