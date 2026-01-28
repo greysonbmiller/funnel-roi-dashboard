@@ -123,12 +123,18 @@ st.markdown("""
 @st.cache_data
 def load_data():
     """Load and process data from Excel file."""
+    # Get the directory where this script is located
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.dirname(script_dir)
+
     # Try multiple potential paths (for local dev and Streamlit Cloud)
     possible_paths = [
-        # Streamlit Cloud - relative to repo root
+        # Relative to repo root (most likely for Streamlit Cloud)
+        os.path.join(repo_root, 'Value Engineer _ Case Study Data.xlsx'),
+        # Current working directory
         'Value Engineer _ Case Study Data.xlsx',
-        # Relative to dashboard folder
-        os.path.join(os.path.dirname(__file__), '..', 'Value Engineer _ Case Study Data.xlsx'),
+        # Relative to dashboard folder going up one level
+        os.path.join(script_dir, '..', 'Value Engineer _ Case Study Data.xlsx'),
         # Absolute path for local development
         r'C:\Users\Lenovo\Documents\Work\Funnel Leasing\Value Engineer _ Case Study Data.xlsx',
     ]
@@ -140,8 +146,8 @@ def load_data():
             break
 
     if file_path is None:
-        # Debug: show what paths were tried
-        return None, f"Data file not found. Tried: {possible_paths}"
+        # Debug: show what paths were tried and current working directory
+        return None, f"Data file not found. CWD: {os.getcwd()}, Script dir: {script_dir}, Tried: {possible_paths}"
 
     try:
         # Load all sheets
