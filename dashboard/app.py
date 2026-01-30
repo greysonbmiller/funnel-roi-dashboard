@@ -954,7 +954,7 @@ with tab5:
         horizontal=True
     )
 
-    if stakeholder == "CFO":
+    if stakeholder == "Financial":
         st.markdown("### CFO View: Financial Performance")
 
         col1, col2, col3 = st.columns(3)
@@ -993,7 +993,7 @@ with tab5:
         - Analysis excludes marketing efficiency (~${marketing_soft_benefit:,.0f} additional soft benefit)
         """)
 
-    elif stakeholder == "VP of Marketing":
+    elif stakeholder == "Marketing":
         st.markdown("### VP of Marketing View: Lead Performance")
 
         col1, col2, col3 = st.columns(3)
