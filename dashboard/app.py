@@ -950,7 +950,7 @@ with tab5:
 
     stakeholder = st.radio(
         "Select Stakeholder View:",
-        ["CFO", "VP of Marketing", "SVP of Operations"],
+        ["Financial", "Marketing", "Operations"],
         horizontal=True
     )
 
